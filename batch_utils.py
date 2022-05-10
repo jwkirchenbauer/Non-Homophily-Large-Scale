@@ -48,7 +48,8 @@ class AdjRowLoader():
         n = dataset.graph['num_nodes']
         self.node_feat = dataset.graph['node_feat']
         self.edge_index = dataset.graph['edge_index']
-        self.edge_index = sort_edge_index(self.edge_index)[0]
+        # self.edge_index = sort_edge_index(self.edge_index)[0]
+        self.edge_index = sort_edge_index(self.edge_index) # PyG 1.6.3 returned a tuple not just the edge_index
         self.part_spots = [0]
         self.part_nodes = [0]
         self.idx = idx

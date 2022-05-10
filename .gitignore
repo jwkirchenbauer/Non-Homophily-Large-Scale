@@ -1,0 +1,8 @@
+results/
+scalable_results/
+slurm-logs/
+stdout-logs/
+dataset/
+
+*.pyc
+*.gz

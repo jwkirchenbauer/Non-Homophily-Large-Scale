@@ -21,6 +21,9 @@ from torch_geometric.transforms import NormalizeFeatures
 from torch_sparse import SparseTensor
 from ogb.nodeproppred import NodePropPredDataset
 
+# arxiv-year doesn't seem to mind ^^^, but the other ogb datasets prefer this
+from ogb.nodeproppred import PygNodePropPredDataset
+
 
 class NCDataset(object):
     def __init__(self, name, root=f'{DATAPATH}'):
@@ -194,7 +197,8 @@ def load_arxiv_year_dataset(nclass=5):
 
 
 def load_proteins_dataset():
-    ogb_dataset = NodePropPredDataset(name='ogbn-proteins')
+    # ogb_dataset = NodePropPredDataset(name='ogbn-proteins')
+    ogb_dataset = PygNodePropPredDataset(name='ogbn-proteins')
     dataset = NCDataset('ogbn-proteins')
 
     def protein_orig_split(**kwargs):
@@ -204,11 +208,16 @@ def load_proteins_dataset():
                 'test': torch.as_tensor(split_idx['test'])}
 
     dataset.get_idx_split = protein_orig_split
-    dataset.graph, dataset.label = ogb_dataset.graph, ogb_dataset.labels
+    # dataset.graph, dataset.label = ogb_dataset.graph, ogb_dataset.labels
 
-    dataset.graph['edge_index'] = torch.as_tensor(dataset.graph['edge_index'])
-    dataset.graph['edge_feat'] = torch.as_tensor(dataset.graph['edge_feat'])
-    dataset.label = torch.as_tensor(dataset.label)
+    # dataset.graph['edge_index'] = torch.as_tensor(dataset.graph['edge_index'])
+    # dataset.graph['edge_feat'] = torch.as_tensor(dataset.graph['edge_feat'])
+    # dataset.label = torch.as_tensor(dataset.label)
+    dataset.graph['edge_index'] = ogb_dataset.data.edge_index
+    dataset.graph['edge_feat'] = ogb_dataset.data.edge_attr
+    dataset.graph['node_feat'] = ogb_dataset.data.x
+    dataset.graph['num_nodes'] = ogb_dataset.data.num_nodes
+    dataset.label = ogb_dataset.data.y
     return dataset
 
 
@@ -218,6 +227,12 @@ def load_ogb_dataset(name):
     dataset.graph = ogb_dataset.graph
     dataset.graph['edge_index'] = torch.as_tensor(dataset.graph['edge_index'])
     dataset.graph['node_feat'] = torch.as_tensor(dataset.graph['node_feat'])
+    # ogb_dataset = PygNodePropPredDataset(name=name)
+    # dataset.graph = ogb_dataset.data.to_dict() # key change to make it look like orig dict interface
+    # dataset.graph['edge_index'] = ogb_dataset.data.edge_index
+    # dataset.graph['edge_feat'] = ogb_dataset.data.edge_attr
+    # dataset.graph['node_feat'] = ogb_dataset.data.x
+    # dataset.graph['num_nodes'] = ogb_dataset.data.num_nodes
 
     def ogb_idx_to_tensor(**kwargs):
         split_idx = ogb_dataset.get_idx_split()
@@ -227,6 +242,7 @@ def load_ogb_dataset(name):
 
     dataset.get_idx_split = ogb_idx_to_tensor  # ogb_dataset.get_idx_split
     dataset.label = torch.as_tensor(ogb_dataset.labels).reshape(-1, 1)
+    # dataset.label = ogb_dataset.data.y
     return dataset
 
 
