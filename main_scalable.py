@@ -41,24 +41,34 @@ if args.cpu:
 ### Load and preprocess data ###
 dataset = load_nc_dataset(args.dataset, args.sub_dataset)
 
+print(f"Dataset returned: {dataset}")
+
 if len(dataset.label.shape) == 1:
     dataset.label = dataset.label.unsqueeze(1)
 dataset.label = dataset.label.to(device)
+
+print(f"Labels moved: {dataset.label}")
 
 split_idx = dataset.get_idx_split(train_prop=args.train_prop, valid_prop=args.valid_prop)
 train_idx = split_idx['train']
 train_idx = train_idx.to(device)
 
+print(f"train index moved: {train_idx}")
+
 n = dataset.graph['num_nodes']
 # infer the number of classes for non one-hot and one-hot labels
 c = max(dataset.label.max().item() + 1, dataset.label.shape[1])
 d = dataset.graph['node_feat'].shape[1]
+# d = dataset.graph['node_feat'].shape[1] if dataset.graph['node_feat'] is not None else 0
+# print(f"Shapes inferred : {n},{c},{d}")
 
 # whether or not to symmetrize matters a lot!! pay attention to this
 # e.g. directed edges are temporally useful in arxiv-year,
 # so we usually do not symmetrize, but for label prop symmetrizing helps
 if not args.directed and args.dataset != 'ogbn-proteins':
     dataset.graph['edge_index'] = to_undirected(dataset.graph['edge_index'])
+
+    print(f"Edge index made undirected : {dataset.graph['edge_index']}")
 
 train_loader, subgraph_loader = None, None
 
@@ -168,12 +178,14 @@ for run in range(args.runs):
     split_idx = dataset.get_idx_split(train_prop=args.train_prop, valid_prop=args.valid_prop)
 
 
-### Save results ###
+### Save results to scalable_results dir ###
 best_val, best_test = logger.print_statistics()
-filename = f'results/{args.dataset}.csv'
+filename = f'scalable_results/{args.dataset}.csv'
 print(f"Saving results to {filename}")
 with open(f"{filename}", 'a+') as write_obj:
-    sub_dataset = f'{args.sub_dataset},' if args.sub_dataset else ''
-    write_obj.write(f"{args.method}," + f"{sub_dataset}" +
+    sub_dataset = f'{args.sub_dataset}' if args.sub_dataset else 'None'
+    batch_size = f"{args.batch_size}" if args.batch_size else 'None'
+    write_obj.write(f"{args.method}," + f"{batch_size}," + f"{sub_dataset}," +
+                    f"{args.num_layers}," + f"{args.hidden_channels}," +
                     f"{best_val.mean():.3f} ± {best_val.std():.3f}," +
                     f"{best_test.mean():.3f} ± {best_test.std():.3f}\n")

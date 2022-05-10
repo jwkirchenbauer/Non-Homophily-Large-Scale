@@ -231,7 +231,8 @@ else:
 filename = f'results/{args.dataset}.csv'
 print(f"Saving results to {filename}")
 with open(f"{filename}", 'a+') as write_obj:
-    sub_dataset = f'{args.sub_dataset},' if args.sub_dataset else ''
-    write_obj.write(f"{args.method}," + f"{sub_dataset}" +
+    sub_dataset = f'{args.sub_dataset},' if args.sub_dataset else 'None'
+    write_obj.write(f"{args.method}," + f"{sub_dataset}," +
+                    f"{args.num_layers}," + f"{args.hidden_channels}," +
                     f"{best_val.mean():.3f} ± {best_val.std():.3f}," +
                     f"{best_test.mean():.3f} ± {best_test.std():.3f}\n")
