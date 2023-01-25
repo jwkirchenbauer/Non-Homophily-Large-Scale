@@ -223,16 +223,16 @@ def load_proteins_dataset():
 
 def load_ogb_dataset(name):
     dataset = NCDataset(name)
-    ogb_dataset = NodePropPredDataset(name=name)
-    dataset.graph = ogb_dataset.graph
-    dataset.graph['edge_index'] = torch.as_tensor(dataset.graph['edge_index'])
-    dataset.graph['node_feat'] = torch.as_tensor(dataset.graph['node_feat'])
-    # ogb_dataset = PygNodePropPredDataset(name=name)
-    # dataset.graph = ogb_dataset.data.to_dict() # key change to make it look like orig dict interface
-    # dataset.graph['edge_index'] = ogb_dataset.data.edge_index
-    # dataset.graph['edge_feat'] = ogb_dataset.data.edge_attr
-    # dataset.graph['node_feat'] = ogb_dataset.data.x
-    # dataset.graph['num_nodes'] = ogb_dataset.data.num_nodes
+    # ogb_dataset = NodePropPredDataset(name=name)
+    # dataset.graph = ogb_dataset.graph
+    # dataset.graph['edge_index'] = torch.as_tensor(dataset.graph['edge_index'])
+    # dataset.graph['node_feat'] = torch.as_tensor(dataset.graph['node_feat'])
+    ogb_dataset = PygNodePropPredDataset(name=name)
+    dataset.graph = ogb_dataset.data.to_dict() # key change to make it look like orig dict interface
+    dataset.graph['edge_index'] = ogb_dataset.data.edge_index
+    dataset.graph['edge_feat'] = ogb_dataset.data.edge_attr
+    dataset.graph['node_feat'] = ogb_dataset.data.x
+    dataset.graph['num_nodes'] = ogb_dataset.data.num_nodes
 
     def ogb_idx_to_tensor(**kwargs):
         split_idx = ogb_dataset.get_idx_split()
@@ -241,8 +241,8 @@ def load_ogb_dataset(name):
         return tensor_split_idx
 
     dataset.get_idx_split = ogb_idx_to_tensor  # ogb_dataset.get_idx_split
-    dataset.label = torch.as_tensor(ogb_dataset.labels).reshape(-1, 1)
-    # dataset.label = ogb_dataset.data.y
+    # dataset.label = torch.as_tensor(ogb_dataset.labels).reshape(-1, 1)
+    dataset.label = ogb_dataset.data.y
     return dataset
 
 

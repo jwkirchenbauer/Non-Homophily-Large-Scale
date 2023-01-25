@@ -185,7 +185,13 @@ print(f"Saving results to {filename}")
 with open(f"{filename}", 'a+') as write_obj:
     sub_dataset = f'{args.sub_dataset}' if args.sub_dataset else 'None'
     batch_size = f"{args.batch_size}" if args.batch_size else 'None'
+    train_prop = f"{args.train_prop}" if args.train_prop else 'None'
+    valid_prop = f"{args.valid_prop}" if args.valid_prop else 'None'
+    gat_heads = f"{args.gat_heads}" if args.gat_heads else 'None'
+    lr = f"{args.lr}" if args.lr else 'None'
     write_obj.write(f"{args.method}," + f"{batch_size}," + f"{sub_dataset}," +
                     f"{args.num_layers}," + f"{args.hidden_channels}," +
+                    f"{gat_heads}," + f"{lr}," +
+                    f"{train_prop}," + f"{valid_prop}," +
                     f"{best_val.mean():.3f} ± {best_val.std():.3f}," +
                     f"{best_test.mean():.3f} ± {best_test.std():.3f}\n")
